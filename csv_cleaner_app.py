@@ -10,7 +10,7 @@ st.title("CSV Data Cleaner")
 # Initialize cleaned dataframe
 if 'cleaned_df' not in st.session_state:
     st.session_state.cleaned_df = None
-    
+
 # Create function to load data and data preview
 def load_data_preview(file):
     
@@ -50,6 +50,24 @@ def load_data_preview(file):
         st.metric("Total Null Count:", f"{total_null_count:,}")
     with info_col4:
         st.metric("Total Duplicate Count:", f"{total_duplicate_count:,}")
+    
+    # Null columns charts
+    null_chart_col1, null_chart_col2 = st.columns(2)
+
+    with null_chart_col1:
+        # Show which columns have nulls
+        st.subheader("Null Values by Column")
+        null_summary = df.isnull().sum()
+        # Sort null summary to only show columns with more than 0 nulls
+        null_summary = null_summary[null_summary > 0].sort_values(ascending=False)
+
+        # If more than 0 nulls, create and show graph
+        if len(null_summary) > 0:
+            null_sum_fig = px.bar(x=null_summary.index, y=null_summary.values,
+                                labels={'x': 'Column', 'y': 'Null Count'})
+            st.plotly_chart(null_sum_fig)
+    
+
     
 # Create CSV uploader
 uploaded = st.file_uploader("Upload CSV Data")
