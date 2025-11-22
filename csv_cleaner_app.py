@@ -6,3 +6,60 @@ import pandas as pd
 # Set page layout
 st.set_page_config(layout="wide")
 st.title("CSV Data Cleaner")
+
+# Initialize cleaned dataframe
+if 'cleaned_df' not in st.session_state:
+    st.session_state.cleaned_df = None
+    
+# Create function to load data and data preview
+def load_data_preview(file):
+    
+    # Read CSV and create copy
+    if st.session_state.cleaned_df is None:
+        df = pd.read_csv(file)
+        st.session_state.cleaned_df = df.copy()
+    else:
+        df = pd.read_csv(file)
+    
+    # Create data info expanders for data preview
+    st.subheader("Original Data Preview")
+    expander_tab1, expander_tab2 = st.columns(2)
+
+    with expander_tab1:
+        with st.expander("Data Head"):
+            st.dataframe(df.head(8))
+    with expander_tab2:
+        with st.expander("Data Description"):
+            st.dataframe(df.describe())
+    st.divider()
+
+    # Collect null counts from data
+    num_null_count = df.select_dtypes(include=['int64', 'float64']).isnull().sum().sum()
+    text_null_count = df.select_dtypes(include=['object']).isnull().sum().sum()
+    total_null_count = df.isnull().sum().sum()
+    total_duplicate_count = df.duplicated().sum()
+
+    # Display null data info
+    info_col1, info_col2, info_col3, info_col4 = st.columns(4)
+
+    with info_col1:
+        st.metric("Numerical Null Count:", f"{num_null_count:,}")
+    with info_col2:
+        st.metric("Text Null Count:", f"{text_null_count:,}")
+    with info_col3:
+        st.metric("Total Null Count:", f"{total_null_count:,}")
+    with info_col4:
+        st.metric("Total Duplicate Count:", f"{total_duplicate_count:,}")
+    
+# Create CSV uploader
+uploaded = st.file_uploader("Upload CSV Data")
+
+# Load data when uploaded
+if uploaded:
+    try:
+        load_data_preview(uploaded)
+    except Exception as e:
+        st.error(f"Error loading CSV: {e}")
+        st.stop()
+
+
