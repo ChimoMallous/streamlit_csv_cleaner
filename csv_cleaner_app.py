@@ -68,6 +68,24 @@ def load_data_preview(file):
             st.plotly_chart(null_sum_fig)
         else: 
             st.success("No Null Values Found")
+        
+    with null_chart_col2:
+        # Show null versus filled per column
+        st.subheader("Null versus Filled by Column")
+        cols_with_nulls = [col for col in df.columns if df[col].isnull().sum() > 0]
+        col_stats = pd.DataFrame({
+            "Column": cols_with_nulls,
+            "Missing": [df[col].isnull().sum() for col in cols_with_nulls],
+            "Filled": [df[col].notnull().sum() for col in cols_with_nulls]  
+        })
+        null_vs_fill_fig = px.bar(
+            col_stats,
+            x="Column",
+            y=["Missing", "Filled"],
+            barmode="stack",
+            color_discrete_sequence=["#B80000", "#006747"])
+        
+        st.plotly_chart(null_vs_fill_fig)
 
     
 # Create CSV uploader
