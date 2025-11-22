@@ -63,8 +63,10 @@ def load_data_preview(file):
 
         # If more than 0 nulls, create and show graph
         if len(null_summary) > 0:
-            null_sum_fig = px.bar(x=null_summary.index, y=null_summary.values,
-                                labels={'x': 'Column', 'y': 'Null Count'})
+            null_sum_fig = px.bar(
+                x=null_summary.index, y=null_summary.values,
+                labels={'x': 'Column', 'y': 'Null Count'},
+                color_discrete_sequence=["#B80000"])
             st.plotly_chart(null_sum_fig)
         else: 
             st.success("No Null Values Found")
