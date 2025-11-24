@@ -97,8 +97,69 @@ uploaded = st.file_uploader("Upload CSV Data")
 if uploaded:
     try:
         load_data_preview(uploaded)
+        cleaned_df = st.session_state.cleaned_df.copy()
+
     except Exception as e:
         st.error(f"Error loading CSV: {e}")
         st.stop()
 
+    # Create cleaning sections if file is uploaded
+    st.divider()
+    st.header("**Data Cleaning**")
+    st.subheader("Cleaning Options")
+    cleaning_col1, cleaning_col2, cleaning_col3 = st.columns(3)
+
+    # Create text cleaning column
+    with cleaning_col1:
+        st.write("**Text Columns**")
+
+        # Filter text columns from data
+        text_cols = cleaned_df.select_dtypes(include=['object']).columns.tolist()
+        text_cols_with_nulls = [col for col in text_cols if cleaned_df[col].isnull().sum() > 0]
+
+        # Create selectbox with options for text column cleaning 
+        if text_cols:
+            text_method = st.selectbox(
+                "Select method to handle missing values in text columns:",
+                [
+                    "Fill with Mode",
+                    "Fill with 'Unknown'",
+                    "Fill with Empty String",
+                    "Fill with Custom Input",
+                    "Forward Fill",
+                    "Backward Fill"
+                ], key="text_method"
+            )
+            text_input = None
+
+            # Create extra input box if text cleaning option is 'fill with custom input'
+            if text_method == "Fill with Custom Input":
+                text_input = st.text_input("Enter Custom Input")
+                if not text_input:
+                    st.warning("Please enter a custom input before applying")
+
+            # Create button to apply text column cleaning operations
+            if st.button("Apply to Text Columns", type='primary', key='apply_text'):
+                for col in text_cols_with_nulls:
+                    # Text mode
+                    if text_method == "Fill with Mode":
+                        cleaned_df[col].fillna(cleaned_df[col].mode()[0] if not cleaned_df[col].mode().empty else 'Unknown', inplace=True)
+                    # Text 'unknown'
+                    elif text_method == "Fill with 'Unknown'":
+                        cleaned_df[col].fillna('Unknown')
+                    # Text empty string
+                    elif text_method == "Fill with Empty String":
+                        cleaned_df[col].fillna('')
+                    # Text forward fill
+                    elif text_method == "Forward Fill":
+                        cleaned_df[col] = cleaned_df[col].ffill()
+                    # Text backward fill
+                    elif text_method == "Backward Fill":
+                        cleaned_df[col] = cleaned_df[col].bfill()
+                    # Text custom input
+                    elif text_method == "Fill with Custom Input":
+                        cleaned_df[col] = cleaned_df[col].fillna(text_input)
+                
+                # Save cleaned dataframe state
+                st.session_state.cleaned_df = cleaned_df
 
