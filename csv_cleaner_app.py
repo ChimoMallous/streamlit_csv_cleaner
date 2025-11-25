@@ -134,32 +134,97 @@ if uploaded:
 
             # Create extra input box if text cleaning option is 'fill with custom input'
             if text_method == "Fill with Custom Input":
-                text_input = st.text_input("Enter Custom Input")
+                text_input = st.text_input("Enter Custom Input", key="text_input")
                 if not text_input:
                     st.warning("Please enter a custom input before applying")
 
             # Create button to apply text column cleaning operations
             if st.button("Apply to Text Columns", type='primary', key='apply_text'):
                 for col in text_cols_with_nulls:
+
                     # Text mode
                     if text_method == "Fill with Mode":
                         cleaned_df[col].fillna(cleaned_df[col].mode()[0] if not cleaned_df[col].mode().empty else 'Unknown', inplace=True)
                     # Text 'unknown'
                     elif text_method == "Fill with 'Unknown'":
-                        cleaned_df[col].fillna('Unknown')
+                        cleaned_df[col].fillna('Unknown', inplace=True)
                     # Text empty string
                     elif text_method == "Fill with Empty String":
-                        cleaned_df[col].fillna('')
+                        cleaned_df[col].fillna('', inplace=True)
                     # Text forward fill
                     elif text_method == "Forward Fill":
-                        cleaned_df[col] = cleaned_df[col].ffill()
+                        cleaned_df[col].ffill(inplace=True)
                     # Text backward fill
                     elif text_method == "Backward Fill":
-                        cleaned_df[col] = cleaned_df[col].bfill()
+                        cleaned_df[col].bfill(inplace=True)
                     # Text custom input
                     elif text_method == "Fill with Custom Input":
-                        cleaned_df[col] = cleaned_df[col].fillna(text_input)
+                        cleaned_df[col].fillna(text_input, inplace=True)
                 
+                # Save cleaned dataframe state
+                st.session_state.cleaned_df = cleaned_df
+
+    # Create numeric cleaning column
+    with cleaning_col2:
+        st.write("**Numeric Columns**")
+
+        # Filter numeric columns from data
+        numeric_cols = cleaned_df.select_dtypes(include=['int64', 'float64']).columns.tolist()
+        numeric_cols_with_nulls = [col for col in numeric_cols if cleaned_df[col].isnull().sum() > 0]
+
+        # Create selectbox with options for numeric column cleaning
+        if numeric_cols:
+            numeric_method = st.selectbox(
+                "Select method to handle missing values in numeric columns:",
+                [
+                    "Fill with Mean",
+                    "Fill with Median",
+                    "Fill with Mode",
+                    "Forward Fill",
+                    "Backward Fill",
+                    "Fill with Custom Value"
+                ]
+            )
+            numeric_input = None
+
+            # Create extra input box if text cleaning option is 'fill with custom value'
+            if numeric_method == "Fill with Custom Value":
+                numeric_input = st.text_input("Enter Custom Input", key="num_input")
+                
+                # Make sure numeric input is a proper numeric value before proceeding 
+                if numeric_input:
+                    try:
+                        numeric_input = float(numeric_input)
+                    except:
+                        st.error("Please enter a valid numeric value")
+                        st.stop()
+                else:
+                    st.warning("Please enter a custom value before applying")
+
+            # Create button to apply numeric column cleaning operations
+            if st.button("Apply to Numeric Columns", type="primary", key="apply_numeric"):
+
+                for col in numeric_cols_with_nulls:
+
+                    # Numeric mean
+                    if numeric_method == "Fill with Mean":
+                        cleaned_df[col].fillna(cleaned_df[col].mean(), inplace=True)
+                    # Numeric median
+                    elif numeric_method == "Fill with Median":
+                        cleaned_df[col].fillna(cleaned_df[col].median(), inplace=True)
+                    # Numeric mode
+                    elif numeric_method == "Fill with Mode":
+                        cleaned_df[col].fillna(cleaned_df[col].mode()[0] if not cleaned_df[col].mode().empty else 0, inplace=True)
+                    # Numeric forward fill
+                    elif numeric_method == "Forward Fill":
+                        cleaned_df[col].ffill(inplace=True)
+                    # Numeric backward fill
+                    elif numeric_method == "Backward Fill":
+                        cleaned_df[col].bfill(inplace=True)
+                    # Numeric custom value
+                    elif numeric_method == "Fill with Custom Value":
+                        cleaned_df[col].fillna(numeric_input, inplace=True)
+
                 # Save cleaned dataframe state
                 st.session_state.cleaned_df = cleaned_df
 
