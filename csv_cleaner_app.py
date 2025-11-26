@@ -107,7 +107,7 @@ if uploaded:
     st.divider()
     st.header("**Data Cleaning**")
     st.subheader("Cleaning Options")
-    cleaning_col1, cleaning_col2, cleaning_col3 = st.columns(3)
+    cleaning_col1, cleaning_col2, cleaning_col3, cleaning_col4 = st.columns(4)
 
     # Create text cleaning column
     with cleaning_col1:
@@ -238,7 +238,7 @@ if uploaded:
         if text_cols:
             # Create selectbox for data formatting options
             format_method = st.selectbox(
-                "Format all text columns:",
+                "Select method to apply formatting to text columns in dataset:",
                 [
                     "Uppercase",
                     "Lowercase",
@@ -266,3 +266,31 @@ if uploaded:
                 # Save cleaned data
                 st.session_state.cleaned_df = cleaned_df
 
+    # Create drop options column
+    with cleaning_col4:
+        st.write("**Drop Options**")
+
+        # Create selectbox for drop choices
+        drop_choice = st.selectbox(
+            "Select method to handle rows, columns, and duplicates in dataset:",
+            [
+                "Drop Duplicate Rows",
+                "Drop Rows with any Nulls",
+                "Drop Columns with any Nulls"
+            ], key='drop_choice'
+        )
+
+        # Create button to apply drop options
+        if st.button("Apply Method", type="primary", key='apply_drop'):
+            # Drop duplicate rows
+            if drop_choice == "Drop Duplicate Rows":
+                cleaned_df.drop_duplicates(inplace=True)
+            # Drop rows with nulls
+            elif drop_choice == "Drop Rows with any Nulls":
+                cleaned_df.dropna(axis=0, inplace=True)
+            # Drop columns with any nulls
+            elif drop_choice == "Drop Columns with any Nulls":
+                cleaned_df.dropna(axis=1, inplace=True)
+            
+            # Save cleaned data
+            st.session_state.cleaned_df = cleaned_df
