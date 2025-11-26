@@ -14,10 +14,11 @@ Current Features
     - Total null values
     - Duplicate row count
 - Displays bar chart of null values by column
+- Numeric column cleaning options with custom value support
+- Text column cleaning options with custom input support
+- Data formatting options
 
 Planned features
-- Numeric column cleaning options
-- Text column cleaning options
 - Drop operations
 - Preview of cleaned data
 - Ability to download cleaned data
