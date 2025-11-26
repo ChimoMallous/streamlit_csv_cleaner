@@ -89,6 +89,32 @@ def load_data_preview(file):
         
         st.plotly_chart(null_vs_fill_fig)
 
+# Create function to load cleaned data and cleaned data preview
+def load_cleaned_preview(df):
+    # Create data info expanders
+    st.subheader("Cleaned Data Preview")
+    expand_tab1, expand_tab2 = st.columns(2)
+    with expand_tab1:
+        with st.expander("Cleaned Data Head"):
+            st.dataframe(df.head(8))
+    with expand_tab2:
+        with st.expander("Cleaned Data Description"):
+            st.dataframe(df.describe())
+    st.divider()
+
+    # Collect null information
+    text_null_count = df.select_dtypes(include=['object']).isnull().sum().sum()
+    num_null_count = df.select_dtypes(include=['int64', 'float64']).isnull().sum().sum()
+    total_null_count = df.isnull().sum().sum()
+    total_duplicate_count = df.duplicated().sum()
+
+    # Display null information
+    data_col1, data_col2, data_col3, data_col4 = st.columns(4)
+    data_col1.metric("Num Null Count:", f"{num_null_count:,}")
+    data_col2.metric("Text Null Count:", f"{text_null_count:,}")
+    data_col3.metric("Total Null Count:", f"{total_null_count:,}")
+    data_col4.metric("Total Duplicate Row Count:", f"{total_duplicate_count:,}")
+
     
 # Create CSV uploader
 uploaded = st.file_uploader("Upload CSV Data")
@@ -294,3 +320,6 @@ if uploaded:
             
             # Save cleaned data
             st.session_state.cleaned_df = cleaned_df
+    
+    # Load cleaned data preview
+    load_cleaned_preview(cleaned_df)
