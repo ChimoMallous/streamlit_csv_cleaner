@@ -10,6 +10,8 @@ st.title("CSV Data Cleaner")
 # Initialize cleaned dataframe
 if 'cleaned_df' not in st.session_state:
     st.session_state.cleaned_df = None
+if 'original_df' not in st.session_state:
+    st.session_state.original_df = None
 
 # Create function to load data and data preview
 def load_data_preview(file):
@@ -17,9 +19,10 @@ def load_data_preview(file):
     # Read CSV and create copy
     if st.session_state.cleaned_df is None:
         df = pd.read_csv(file)
+        st.session_state.original_df = df.copy()
         st.session_state.cleaned_df = df.copy()
     else:
-        df = pd.read_csv(file)
+        df = pd.read_csv(file) if file else st.session_state.cleaned_df
     
     # Create data info expanders for data preview
     st.subheader("Original Data Preview")
@@ -27,17 +30,17 @@ def load_data_preview(file):
 
     with expander_tab1:
         with st.expander("Data Head"):
-            st.dataframe(df.head(8))
+            st.dataframe(st.session_state.original_df.head(8))
     with expander_tab2:
         with st.expander("Data Description"):
-            st.dataframe(df.describe())
+            st.dataframe(st.session_state.original_df.describe())
     st.divider()
 
     # Collect null counts from data
-    num_null_count = df.select_dtypes(include=['int64', 'float64']).isnull().sum().sum()
-    text_null_count = df.select_dtypes(include=['object']).isnull().sum().sum()
-    total_null_count = df.isnull().sum().sum()
-    total_duplicate_count = df.duplicated().sum()
+    num_null_count = st.session_state.original_df.select_dtypes(include=['int64', 'float64']).isnull().sum().sum()
+    text_null_count = st.session_state.original_df.select_dtypes(include=['object']).isnull().sum().sum()
+    total_null_count = st.session_state.original_df.isnull().sum().sum()
+    total_duplicate_count = st.session_state.original_df.duplicated().sum()
 
     # Display null data info
     info_col1, info_col2, info_col3, info_col4 = st.columns(4)
@@ -57,7 +60,7 @@ def load_data_preview(file):
     with null_chart_col1:
         # Show which columns have nulls
         st.subheader("Null Values by Column")
-        null_summary = df.isnull().sum()
+        null_summary = st.session_state.original_df.isnull().sum()
         # Sort null summary to only show columns with more than 0 nulls
         null_summary = null_summary[null_summary > 0].sort_values(ascending=False)
 
@@ -74,11 +77,11 @@ def load_data_preview(file):
     with null_chart_col2:
         # Show null versus filled per column
         st.subheader("Null versus Filled by Column")
-        cols_with_nulls = [col for col in df.columns if df[col].isnull().sum() > 0]
+        cols_with_nulls = [col for col in st.session_state.original_df.columns if st.session_state.original_df[col].isnull().sum() > 0]
         col_stats = pd.DataFrame({
             "Column": cols_with_nulls,
-            "Missing": [df[col].isnull().sum() for col in cols_with_nulls],
-            "Filled": [df[col].notnull().sum() for col in cols_with_nulls]  
+            "Missing": [st.session_state.original_df[col].isnull().sum() for col in cols_with_nulls],
+            "Filled": [st.session_state.original_df[col].notnull().sum() for col in cols_with_nulls]  
         })
         null_vs_fill_fig = px.bar(
             col_stats,
@@ -119,8 +122,22 @@ def load_cleaned_preview(df):
 # Create CSV uploader
 uploaded = st.file_uploader("Upload CSV Data")
 
+# Add button to load sample data
+if st.button("Load Sample Data", type="secondary"):
+    sample_data = pd.DataFrame({
+        'Name': ['JOHN DOE', 'jane smith', None, 'Bob  Wilson', 'Alice Lee', 'JOHN DOE', 'Mike Chen', None, '  Sarah Park'],
+        'Age': [25, 30, 35, None, 28, 25, 45, 32, None],
+        'City': ['NEW YORK', 'los angeles', 'CHICAGO', None, 'boston', 'NEW YORK', 'Seattle', 'Portland', 'Miami  '],
+        'Salary': [50000, 60000, None, 70000, 55000, 50000, 80000, None, 62000],
+        'Department': ['Sales', 'marketing', 'IT', 'Sales', None, 'Sales', 'it', 'Marketing', 'SALES'],
+        'Email': ['john@email.com', 'jane@email.com', None, 'bob@email.com  ', 'alice@email.com', 'john@email.com', None, 'sarah@email.com', 'mike@email.com']
+    })
+    st.session_state.original_df = sample_data.copy()
+    st.session_state.cleaned_df = sample_data.copy()
+    st.rerun()
+
 # Load data when uploaded
-if uploaded:
+if uploaded or st.session_state.cleaned_df is not None:
     try:
         load_data_preview(uploaded)
         cleaned_df = st.session_state.cleaned_df.copy()
@@ -333,8 +350,8 @@ if uploaded:
     # Create button to reset cleaned dataframe
     with button_col1:
         if st.button("Reset Cleaned Dataframe"):
-            if 'cleaned_df' in st.session_state:
-                del st.session_state.cleaned_df
+            if st.session_state.original_df is not None:
+                st.session_state.cleaned_df = st.session_state.original_df.copy()
                 st.rerun()
     
     # Create button to download cleaned csv data
