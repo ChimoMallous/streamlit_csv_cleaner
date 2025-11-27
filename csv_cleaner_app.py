@@ -12,17 +12,11 @@ if 'cleaned_df' not in st.session_state:
     st.session_state.cleaned_df = None
 if 'original_df' not in st.session_state:
     st.session_state.original_df = None
+if 'last_file_id' not in st.session_state:
+    st.session_state.last_file_id = None
 
 # Create function to load data and data preview
 def load_data_preview(file):
-    
-    # Read CSV and create copy
-    if st.session_state.cleaned_df is None:
-        df = pd.read_csv(file)
-        st.session_state.original_df = df.copy()
-        st.session_state.cleaned_df = df.copy()
-    else:
-        df = pd.read_csv(file) if file else st.session_state.cleaned_df
     
     # Create data info expanders for data preview
     st.subheader("Original Data Preview")
@@ -122,6 +116,16 @@ def load_cleaned_preview(df):
 # Create CSV uploader
 uploaded = st.file_uploader("Upload CSV Data")
 
+# Check if a new file is uploaded
+if uploaded is not None:
+    file_id = uploaded.file_id
+    # If new file, reset everything
+    if st.session_state.last_file_id != file_id:
+        df = pd.read_csv(uploaded)
+        st.session_state.original_df = df.copy()
+        st.session_state.cleaned_df = df.copy()
+        st.session_state.last_file_id = file_id
+
 # Add button to load sample data
 if st.button("Load Sample Data", type="secondary"):
     sample_data = pd.DataFrame({
@@ -134,10 +138,11 @@ if st.button("Load Sample Data", type="secondary"):
     })
     st.session_state.original_df = sample_data.copy()
     st.session_state.cleaned_df = sample_data.copy()
+    st.session_state.last_file_id = 'sample_data'
     st.rerun()
 
 # Load data when uploaded
-if uploaded or st.session_state.cleaned_df is not None:
+if st.session_state.cleaned_df is not None:
     try:
         load_data_preview(uploaded)
         cleaned_df = st.session_state.cleaned_df.copy()
