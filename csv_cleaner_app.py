@@ -2,6 +2,7 @@
 import streamlit as st
 import plotly.express as px
 import pandas as pd
+import time
 
 # Set page layout
 st.set_page_config(layout="wide")
@@ -133,24 +134,28 @@ if uploaded is not None:
     file_id = uploaded.file_id
     # If new file, reset everything
     if st.session_state.last_file_id != file_id:
-        df = pd.read_csv(uploaded)
-        st.session_state.original_df = df.copy()
-        st.session_state.cleaned_df = df.copy()
-        st.session_state.last_file_id = file_id
+        with st.spinner("Loading CSV..."):
+            time.sleep(1)
+            df = pd.read_csv(uploaded)
+            st.session_state.original_df = df.copy()
+            st.session_state.cleaned_df = df.copy()
+            st.session_state.last_file_id = file_id
 
 # Add button to load sample data
 if st.button("Load Sample Data", type="secondary"):
-    sample_data = pd.DataFrame({
-        'Name': ['JOHN DOE', 'jane smith', None, 'Bob  Wilson', 'Alice Lee', 'JOHN DOE', 'Mike Chen', None, '  Sarah Park'],
-        'Age': [25, 30, 35, None, 28, 25, 45, 32, None],
-        'City': ['NEW YORK', 'los angeles', 'CHICAGO', None, 'boston', 'NEW YORK', 'Seattle', 'Portland', 'Miami  '],
-        'Salary': [50000, 60000, None, 70000, 55000, 50000, 80000, None, 62000],
-        'Department': ['Sales', 'marketing', 'IT', 'Sales', None, 'Sales', 'it', 'Marketing', 'SALES'],
-        'Email': ['john@email.com', 'jane@email.com', None, 'bob@email.com  ', 'alice@email.com', 'john@email.com', None, 'sarah@email.com', 'mike@email.com']
-    })
-    st.session_state.original_df = sample_data.copy()
-    st.session_state.cleaned_df = sample_data.copy()
-    st.session_state.last_file_id = 'sample_data'
+    with st.spinner("Loading Sample Data..."):
+        time.sleep(1)
+        sample_data = pd.DataFrame({
+            'Name': ['JOHN DOE', 'jane smith', None, 'Bob  Wilson', 'Alice Lee', 'JOHN DOE', 'Mike Chen', None, '  Sarah Park'],
+            'Age': [25, 30, 35, None, 28, 25, 45, 32, None],
+            'City': ['NEW YORK', 'los angeles', 'CHICAGO', None, 'boston', 'NEW YORK', 'Seattle', 'Portland', 'Miami  '],
+            'Salary': [50000, 60000, None, 70000, 55000, 50000, 80000, None, 62000],
+            'Department': ['Sales', 'marketing', 'IT', 'Sales', None, 'Sales', 'it', 'Marketing', 'SALES'],
+            'Email': ['john@email.com', 'jane@email.com', None, 'bob@email.com  ', 'alice@email.com', 'john@email.com', None, 'sarah@email.com', 'mike@email.com']
+        })
+        st.session_state.original_df = sample_data.copy()
+        st.session_state.cleaned_df = sample_data.copy()
+        st.session_state.last_file_id = 'sample_data'
     st.rerun()
 
 # Load data when uploaded
