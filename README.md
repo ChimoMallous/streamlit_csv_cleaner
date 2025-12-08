@@ -1,36 +1,40 @@
-WORK IN PROGRESS
-This project is currently under development, see planned features for future additions.
+# Streamlit CSV Cleaner
 
-Streamlit CSV Cleaner
+This program creates an interactive CSV-cleaning tool that allows users to upload and preview a CSV file, see data descriptions, apply various cleaning operations, visualize missing values, and download the cleaned results. It is built with Streamlit, Pandas, and Plotly to make data cleaning simple and accessible.
 
-This program creates an interactive CSV cleaning tool built with streamlit, pandas, and plotly to allow the user to upload and preview a CSV file, analyze null values, visualize missing data, apply a wide range of cleaning operations, and then finally download that cleaned data without having to write any code.
+## Project Status: In Progress
 
-Current Features
-- Displays first 8 rows of data
-- Shows data description
-- Summaries of:
-    - Numerical null counts
-    - Text null counts
-    - Total null values
-    - Duplicate row count
-- Displays bar chart of null values by column
-- Numeric column cleaning options with custom value support
-- Text column cleaning options with custom input support
-- Data formatting options
-- Drop operation options
+This project is still being developed and is not yet fully finished.
 
-Planned features
-- Preview of cleaned data
-- Ability to download cleaned data
-- Restart session data
-- Improved UI and layout
+## Current Features
 
-How to run app
-- Install dependencies:
-    - pip install streamlit pandas plotly
-- Run the app:
-    - type "Streamlit run csv_cleaner_app.py" to run file in streamlit
+- Displays the first 8 rows of the uploaded data  
+- Shows data description such as column names, dtypes, and example values  
+- Summary information including:  
+  - Numeric null counts per column  
+  - Text null counts per column  
+  - Total number of null values  
+  - Duplicate row count  
+- Bar chart visualization of null values per column  
+- Numeric cleaning options (with support for custom input values)  
+- Text cleaning options (with support for custom input values)  
+- Data formatting options  
+- Drop operations (for removing columns or specific rows)  
+- Preview of cleaned data  
+- Download cleaned CSV file  
 
+## How to Run
 
+Install the required libraries:
+
+```bash
+pip install streamlit pandas plotly
+```
+
+Run the application:
+
+```bash
+streamlit run csv_cleaner_app.py
+```
 
 
